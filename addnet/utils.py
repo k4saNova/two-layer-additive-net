@@ -12,7 +12,13 @@ def sigmoid(x):
     return 1. / (1. + np.exp(-x))
 
 
-def get_ranged_sigmoid(x, eps=1e-15):
+def get_ranged_sigmoid(eps=1e-15):
+    """it returns ranged_sigmoid function.
+    it is to avoid error about floating number
+    
+    Args:
+        eps: minimum number (default: 1e-15)
+    """
     abs_max = np.log((1-eps)/eps)
     def ranged_sigmoid(x):
         return sigmoid(np.clip(x, -abs_max, abs_max))

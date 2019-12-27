@@ -13,4 +13,4 @@ install:
 
 clean:
 	@ rm $(PWD)/build/ $(PWD)/dist/ $(ENV_PATH) -rf
-
+	@ find . -type d -name "__pycache__" -delete

@@ -66,7 +66,8 @@ class SubNet(object):
         # binarize X
         binarized_x = self.binarize(X)
 
-        # 
+        #
+        ranged_sigmoid = get_ranged_sigmoid()
         
         # objective function
         def obj_f_l2(w):
