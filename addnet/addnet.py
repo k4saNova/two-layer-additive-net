@@ -65,6 +65,8 @@ class SubNet(object):
         """
         # binarize X
         binarized_x = self.binarize(X)
+
+        # 
         
         # objective function
         def obj_f_l2(w):
