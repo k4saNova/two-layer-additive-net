@@ -1,12 +1,13 @@
 ENV_PATH = $(PWD)/env
-PYTHON = `which python3.8`
+PYTHON_VERSION = `which python3.8`
+PYTHON = $(ENV_PATH)/bin/python
 
-.PHONY: env test
+.PHONY: env tests
 env:
-	@ virtualenv $(ENV_PATH) --python=$(PYTHON)
+	@ virtualenv $(ENV_PATH) --python=$(PYTHON_VERSION)
 
-test:
-	@ echo "test"
+tests:
+	@ $(PYTHON) tests/test.py
 
 install:
 	@ $(PYTHON) setup.py install

@@ -8,19 +8,17 @@ from addnet.utils import *
 class SubNet(object):
     def __init__(self, binarization=None, **kawgs):
         self.coef_ = None
+        # a coefficient vector of the model
         if binarization is not None:
-            self.binarization = binarization
+            self.bin_thresholds = binarization
+            self.bin_dim = sum(map(len, self.bin_thresholds)) + 1
         else:
-            self.binarization = None
+            self.bin_thresholds = None
+            self.bin_dim = None
         # list of list of thresholds
         # seikika kou.
         self.regularization_param = 1.
-
-        # # of dimension of binarized instances
-        if self.binarization is not None:
-            self.bin_dim = sum(map(len, self.binarization)) + 1
-        else:
-            self.bin_dim = None
+        self.uncertainry_metrics = "gini"
 
             
     def binarize(self, X):
@@ -30,7 +28,7 @@ class SubNet(object):
         binarized_x = np.zeros((X.shape[0], self.bin_dim))
         # b_{p, i} in paper
         idx = 0
-        for i, (thresholds, increasing) in enumerate(zip(self.binarization, self.is_increasing)):
+        for i, (thresholds, increasing) in enumerate(zip(self.bin_thresholds, self.is_increasing)):
             for t in thresholds:
                 if increasing: # x > t
                     binarized_x[X[:,i]>t, idx] = 1.
@@ -52,7 +50,7 @@ class SubNet(object):
         # make bounds of coefficients
         bounds = [None] * self.bin_dim
         idx = 0
-        for i, (thresholds, increasing) in enumerate(zip(self.binarization, self.is_increasing)):
+        for i, (thresholds, increasing) in enumerate(zip(self.bin_thresholds, self.is_increasing)):
             for j, t in enumerate(thresholds):
                 if (increasing and j==0) or (not increasing and j==len(thresholds)-1):
                     bounds[idx] = (None, None)
@@ -63,10 +61,13 @@ class SubNet(object):
         return bounds
 
 
-    def set_binarization_params(self, X, y):
-        pass
+    def set_binarization_params(self, X, y, K=4):
+        if self.bin_thresholds is None:
+            tree = segment_space(X, y, K, metrics=self.uncertainry_metrics)
+            self.bin_thresholds = tree.bin_thresholds
+            self.bin_dim =  sum(map(len, self.bin_thresholds)) + 1
 
-
+            
     def check_increasing(self, X, y):
         """it sets self.is_increasing
         Args:
@@ -91,9 +92,9 @@ class SubNet(object):
         # check increasity (or decreasity) of each attribute
         self.check_increasing(X, y)
         
-        # it sets self.binarization, self.bin_dim, and, self.is_increasing
+        # it sets self.bin_thresholds, self.bin_dim, and, self.is_increasing
         self.set_binarization_params(X, y)
-
+        
         # binarize X
         binarized_x = self.binarize(X)
 
