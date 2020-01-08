@@ -43,7 +43,8 @@ class SubNet(object):
 
 
     def get_bound_of_coef(self):
-        """it returns the bounds of the coefficients of the model
+        """it returns the bounds of the coefficients of the model.
+
         Return:
             bounds List[Tuple(min, max)]
         """
@@ -61,7 +62,7 @@ class SubNet(object):
         return bounds
 
 
-    def set_binarization_params(self, X, y, K=4):
+    def set_binarization_params(self, X, y, K=10):
         if self.bin_thresholds is None:
             tree = segment_space(X, y, K, metrics=self.uncertainry_metrics)
             self.bin_thresholds = tree.bin_thresholds
@@ -82,13 +83,13 @@ class SubNet(object):
 
 
     def fit(self, X, y):
-        """it calculate weight vector with X and y.
+        """it calculate weight (a.k.a. importance) vector with X and y.
 
         Args:
             X: 2d-array.
             y: labels. 1d-array
         """
-
+        
         # check increasity (or decreasity) of each attribute
         self.check_increasing(X, y)
         
@@ -115,7 +116,7 @@ class SubNet(object):
 
         # set bounds of the coefficient to constrain the model to be monotonicity
         bounds = self.get_bound_of_coef()
-
+        
         # minimize the objective function (cross entropy with l2 regularization)
         x0 = np.random.random(binarized_x.shape[1])
         result = minimize(obj_f_l2, x0=x0, bounds=bounds, jac=jac_f_l2, method="SLSQP")

@@ -10,8 +10,8 @@ N_SAMPLES = 200
 SEED = 314
 
 def main():
-    # X, y = make_moons(n_samples=N_SAMPLES, noise=0.2)# , random_state=SEED)
-    X, y = make_blobs(n_samples=N_SAMPLES, centers=2, random_state=SEED)
+    X, y = make_moons(n_samples=N_SAMPLES, noise=0.2)# , random_state=SEED)
+    # X, y = make_blobs(n_samples=N_SAMPLES, centers=2, random_state=SEED)
     scaler = MinMaxScaler()
     X = scaler.fit_transform(X)
     # print(X)
