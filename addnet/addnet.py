@@ -6,8 +6,9 @@ from sklearn.isotonic import check_increasing
 from addnet.utils import *
 
 class SubNet(object):
-    def __init__(self, binarization=None, **kawgs):
+    def __init__(self, max_seg=16, binarization=None, **kawgs):
         self.coef_ = None
+        self.max_seg = max_seg
         # a coefficient vector of the model
         if binarization is not None:
             self.bin_thresholds = binarization
@@ -15,6 +16,7 @@ class SubNet(object):
         else:
             self.bin_thresholds = None
             self.bin_dim = None
+        self.max_iter = 1000
         # list of list of thresholds
         # seikika kou.
         self.regularization_param = 1.
@@ -62,9 +64,10 @@ class SubNet(object):
         return bounds
 
 
-    def set_binarization_params(self, X, y, K=10):
+    def set_binarization_params(self, X, y):
         if self.bin_thresholds is None:
-            tree = segment_space(X, y, K, metrics=self.uncertainry_metrics)
+            tree = Tree(X.shape[1])# segment_space(X, y, K, metrics=self.uncertainry_metrics)
+            tree.fit(X, y, self.max_seg)
             self.bin_thresholds = tree.bin_thresholds
             self.bin_dim =  sum(map(len, self.bin_thresholds)) + 1
 
@@ -89,6 +92,13 @@ class SubNet(object):
             X: 2d-array.
             y: labels. 1d-array
         """
+
+        # error check
+        if len(X.shape) != 2:
+            raise ValueError(f"X must be 2d-array")
+        
+        if np.unique(y).shape[0] != 2:
+            raise ValueError(f"y must just contain 2 class labels.")
         
         # check increasity (or decreasity) of each attribute
         self.check_increasing(X, y)
@@ -119,11 +129,13 @@ class SubNet(object):
         
         # minimize the objective function (cross entropy with l2 regularization)
         x0 = np.random.random(binarized_x.shape[1])
-        result = minimize(obj_f_l2, x0=x0, bounds=bounds, jac=jac_f_l2, method="SLSQP")
+        options = {"maxiter": self.max_iter} 
+        result = minimize(obj_f_l2, x0=x0, bounds=bounds, jac=jac_f_l2, options=options, method="SLSQP")
 
         if not result.success:
             # TODO: set an appropriate exception
-            raise ValueError(result.message)
+            print("Subnet training:", end="")
+            print(result.message)
         self.coef_ = result.x
 
 

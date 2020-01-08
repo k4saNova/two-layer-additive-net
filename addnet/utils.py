@@ -29,35 +29,71 @@ def get_ranged_sigmoid(eps=1e-15):
     return ranged_sigmoid
 
 
-def get_uncertainry_metrics(labels, metrics):
-    """it returns a function that computes the criteria like gini impurity.
-
-    """
-    class_labels = np.unique(labels)
-
-    def gini_impurity(y):
-        return 1. - sum(y[y==cls].shape[0]**2 for cls in class_labels)/y.shape[0]**2
-
-    return gini_impurity
-
-
 class Tree(dict):
     # id of root node
     root_id = "T"
 
-    def __init__(self, dim):
+    
+    def __init__(self, dim, uncertainry_metrics="gini"):
         super().__init__()
         self.unode_id = set() # updatable node
         self.dim = dim
+        self.uncertainry_metrics = uncertainry_metrics
         self.bin_thresholds = [[] for _ in range(self.dim)]
         self.num_region = 1 # number of segmentation. it is NOT # of leafs.
+        self.num_bdim = 0
 
-
+        
     def __setitem__(self, k, v):
         self.unode_id.add(k) # atarashii node ha updatable
-        super().__setitem__(k, v)
+        super().__setitem__(k, v)    
+        
 
+    def get_uncertainry_metrics(self, labels):
+        """it returns a function that computes the criteria like gini impurity.
+        """
+        class_labels = np.unique(labels)
 
+        def gini_impurity(y):
+            return 1. - sum(y[y==cls].shape[0]**2 for cls in class_labels)/y.shape[0]**2
+
+        def entropy(y):
+            # TODO: implement here
+            return 0.5
+        
+        if self.uncertainry_metrics == "gini":
+            return gini_impurity
+        else:
+            return entropy
+
+        
+        
+    def fit(self, X, y, K):
+        """ it returns a tree that segments the feature space.
+
+        Args:
+            X: training instances.
+            y: labels.
+            K: # of segmentation
+            metrics (optional): uncertainry criteria (defualt: gini)
+
+        Returns:
+            tree: segmentation tree
+        """
+        # initialize Node class variables
+        Node.X = X
+        Node.y = y
+        Node.f_criteria = self.get_uncertainry_metrics(y)
+        
+        if len(self) > 0:
+            for k in self.keys():
+                del self[k]
+                
+        self[Tree.root_id] = Node(Tree.root_id, np.ones(X.shape[0], dtype=bool), None)        
+        while self.num_region < K and len(self.unode_id) > 0:
+            self.split_node()
+            
+            
     def split_node(self):
         """ it splits a node if possible
         """
@@ -149,12 +185,11 @@ class Node(object):
 
     def split_self(self, max_iter=100):
         num_instance, dim = Node.X.shape
-
+        
         def minimize_criteria(x, y):
             vmin, vmax = x.min(), x.max()
             original_criteria = Node.f_criteria(y)
-            current_criteria = original_criteria
-            threshold = (vmin + vmax) / 2.
+            threshold, current_criteria = (vmin + vmax) / 2., original_criteria
             for it in range(max_iter):
                 new_threshold = (vmin + vmax) / 2.
 
@@ -163,7 +198,7 @@ class Node(object):
                 left_cond = x <= new_threshold
                 num_left = x[left_cond].shape[0]
                 left_criteria = Node.f_criteria(y[left_cond])
-
+                
                 # right side from new_threshold
                 # vmin ------ t <---here---> vmax
                 right_cond =  new_threshold < x
@@ -209,30 +244,3 @@ class Node(object):
 
     def has_children(self):
         return self.children_id is not None
-
-
-def segment_space(X, y, K, metrics="gini"):
-    """ it returns a tree that segments the feature space.
-
-    Args:
-        X: training instances.
-        y: labels.
-        metrics (optional): uncertainry criteria (defualt: gini)
-        K (optinal): # of segmentation
-
-    Returns:
-        tree: segmentation tree
-    """
-    # initialize Node class variables
-    Node.X = X
-    Node.y = y
-    Node.f_criteria = get_uncertainry_metrics(y, metrics)
-
-    # make tree
-    tree = Tree(dim=X.shape[1]) # node_id-node pairs
-    tree[Tree.root_id] = Node(Tree.root_id, np.ones(X.shape[0], dtype=bool), None)
-
-    while tree.num_region < K and len(tree.unode_id) > 0:
-        tree.split_node()
-
-    return tree
