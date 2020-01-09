@@ -12,6 +12,7 @@ class SubNet(object):
         """SubNet initializer
         Args:
             max_seg:
+            max_bin_dim:
             bin_thresholds:
             check_increasing_type (optional): "lr": check with LogisticRegression (default)
                                               "sp": check with Spearman correlation coefficient
@@ -21,7 +22,8 @@ class SubNet(object):
 
         # parameters of segmentation
         self.max_seg = max_seg
-        if bin_thresholds is not None: # 
+        
+        if bin_thresholds is not None: # if specified thresholds
             self.bin_thresholds = binarization
             self.bin_dim = sum(map(len, self.bin_thresholds)) + 1
         else:
