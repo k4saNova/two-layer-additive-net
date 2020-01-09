@@ -1,32 +1,54 @@
 import numpy as np
+from warnings import warn
 from numpy.linalg import norm
 from scipy.optimize import minimize
 from sklearn.linear_model import LogisticRegression
 from sklearn.isotonic import check_increasing
+from sklearn.preprocessing import LabelEncoder
 from addnet.utils import *
 
-class SubNet(object):
-    def __init__(self, max_seg=16, binarization=None, **kawgs):
-        self.coef_ = None
-        self.max_seg = max_seg
+class SubNet(object):    
+    def __init__(self, max_seg=16, bin_thresholds=None, check_increasing_type="sp", **kawgs):
+        """SubNet initializer
+        Args:
+            max_seg:
+            bin_thresholds:
+            check_increasing_type (optional): "lr": check with LogisticRegression (default)
+                                              "sp": check with Spearman correlation coefficient
+        """
         # a coefficient vector of the model
-        if binarization is not None:
+        self.coef_ = None
+
+        # parameters of segmentation
+        self.max_seg = max_seg
+        if bin_thresholds is not None: # 
             self.bin_thresholds = binarization
             self.bin_dim = sum(map(len, self.bin_thresholds)) + 1
         else:
             self.bin_thresholds = None
             self.bin_dim = None
+        self.check_increasing_type = check_increasing_type 
+            
+        # parameters of optimization 
         self.max_iter = 1000
-        # list of list of thresholds
-        # seikika kou.
+        self.method = "SLSQP"
+        
+        # regularization parameter of logistic regression {0, 1}^d -> {0, 1}
         self.regularization_param = 1.
         self.uncertainry_metrics = "gini"
+        
+        # parameters of utilities
+        self.label_encoder = None
 
-            
+        
     def binarize(self, X):
+        """it returns binarized X.
+        Args:
+            X: array-like of shape (n_samples, n_features)
+        """
         if len(X.shape) != 2:
-            raise ValueError(f"X must be 2d-array")
-
+            raise ValueError(f"X.shape must be (n_samples, n_features)")
+        
         binarized_x = np.zeros((X.shape[0], self.bin_dim))
         # b_{p, i} in paper
         idx = 0
@@ -65,12 +87,14 @@ class SubNet(object):
 
 
     def set_binarization_params(self, X, y):
+        """it sets self.bin_thresholds and self.bin_dim with utils.Tree
+        """
         if self.bin_thresholds is None:
-            tree = Tree(X.shape[1])# segment_space(X, y, K, metrics=self.uncertainry_metrics)
-            tree.fit(X, y, self.max_seg)
+            tree = Tree(X.shape[1], K=self.max_seg)
+            tree.fit(X, y)
             self.bin_thresholds = tree.bin_thresholds
             self.bin_dim =  sum(map(len, self.bin_thresholds)) + 1
-
+            
             
     def check_increasing(self, X, y):
         """it sets self.is_increasing
@@ -78,13 +102,23 @@ class SubNet(object):
             X: 2d-array. training instances.
             y: 1d-array. labels
         """
-        dim = X.shape[1]
-        self.is_increasing = [None] * dim
-        for d in range(dim):
-            # here, we use spearman's rank correlation
-            self.is_increasing[d] = check_increasing(X[:, d], y)
+        if self.check_increasing_type == "sp":
+            dim = X.shape[1]
+            self.is_increasing = [None] * dim
+            for d in range(dim):
+                # here, we use spearman's rank correlation
+                self.is_increasing[d] = check_increasing(X[:, d], y)
 
+        elif self.check_increasing_type == "lr":
+            clf = LogisticRegression()
+            clf.fit(X, y)
+            w = clf.coef_.flatten()
+            self.is_increasing = (w >= 0).tolist()
 
+        else:
+            self.is_increasing = [True] * dim
+
+        
     def fit(self, X, y):
         """it calculate weight (a.k.a. importance) vector with X and y.
 
@@ -96,10 +130,17 @@ class SubNet(object):
         # error check
         if len(X.shape) != 2:
             raise ValueError(f"X must be 2d-array")
-        
-        if np.unique(y).shape[0] != 2:
+
+        labels = np.unique(y)
+        if labels.shape[0] != 2:
             raise ValueError(f"y must just contain 2 class labels.")
-        
+
+        # if not ((0 in labels) and (1 in labels)):
+        if self.label_encoder is None:
+            self.label_encoder = LabelEncoder()
+            y = self.label_encoder.fit_transform(y)
+            
+            
         # check increasity (or decreasity) of each attribute
         self.check_increasing(X, y)
         
@@ -129,22 +170,31 @@ class SubNet(object):
         
         # minimize the objective function (cross entropy with l2 regularization)
         x0 = np.random.random(binarized_x.shape[1])
-        options = {"maxiter": self.max_iter} 
-        result = minimize(obj_f_l2, x0=x0, bounds=bounds, jac=jac_f_l2, options=options, method="SLSQP")
+        result = minimize(obj_f_l2, x0=x0, bounds=bounds, jac=jac_f_l2,
+                          options={"maxiter": self.max_iter}, method=self.method)
 
         if not result.success:
-            # TODO: set an appropriate exception
-            print("Subnet training:", end="")
-            print(result.message)
+            warn(f"Warning in SubNet.fit(): {result.message}")
+       
+        # set result
         self.coef_ = result.x
-
+        
 
     def decision_function(self, X):
-        return sigmoid(self.binarize(X) @ self.coef_)
-
-
+        return sigmoid(self.binarize(X).dot(self.coef_))
+    
+    
     def predict(self, X):
-        return np.where(self.decision_function(X) < 0.5, 0, 1)
+        """it returns predicted class labels for samples in X.
+
+        Args: 
+            X: array-like of shape (n_samples, n_features)
+        
+        Returns:
+            y: array-like of shape (n_samples, )
+        """
+        y_pred = np.where(self.decision_function(X) < 0.5, 0, 1)
+        return self.label_encoder.inverse_transform(y_pred)
 
 
 

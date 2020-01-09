@@ -34,15 +34,16 @@ class Tree(dict):
     root_id = "T"
 
     
-    def __init__(self, dim, uncertainry_metrics="gini"):
+    def __init__(self, dim, K=10, uncertainry_metrics="gini"):
         super().__init__()
         self.unode_id = set() # updatable node
         self.dim = dim
         self.uncertainry_metrics = uncertainry_metrics
         self.bin_thresholds = [[] for _ in range(self.dim)]
         self.num_region = 1 # number of segmentation. it is NOT # of leafs.
+        self.max_region = K
         self.num_bdim = 0
-
+        self.max_bdim = None # TODO: implement here
         
     def __setitem__(self, k, v):
         self.unode_id.add(k) # atarashii node ha updatable
@@ -68,7 +69,7 @@ class Tree(dict):
 
         
         
-    def fit(self, X, y, K):
+    def fit(self, X, y):
         """ it returns a tree that segments the feature space.
 
         Args:
@@ -90,7 +91,7 @@ class Tree(dict):
                 del self[k]
                 
         self[Tree.root_id] = Node(Tree.root_id, np.ones(X.shape[0], dtype=bool), None)        
-        while self.num_region < K and len(self.unode_id) > 0:
+        while self.num_region < self.max_region and len(self.unode_id) > 0:
             self.split_node()
             
             
@@ -188,6 +189,9 @@ class Node(object):
         
         def minimize_criteria(x, y):
             vmin, vmax = x.min(), x.max()
+            if vmin == vmax:
+                return 0, 0
+                
             original_criteria = Node.f_criteria(y)
             threshold, current_criteria = (vmin + vmax) / 2., original_criteria
             for it in range(max_iter):
@@ -197,14 +201,26 @@ class Node(object):
                 # vmin <---here---> t ------ vmax
                 left_cond = x <= new_threshold
                 num_left = x[left_cond].shape[0]
-                left_criteria = Node.f_criteria(y[left_cond])
-                
+                if num_left > 0:
+                    left_criteria = Node.f_criteria(y[left_cond])
+                else:
+                    print("something is wrong... (left)")
+                    print(f"{x.min()=:.4f}, {x.max()=:.4f}")
+                    print(f"{new_threshold=:.4f}, {threshold=:.4f}")
+                    left_criteria = 0
+                    
                 # right side from new_threshold
                 # vmin ------ t <---here---> vmax
                 right_cond =  new_threshold < x
                 num_right = x[right_cond].shape[0]
-                right_criteria = Node.f_criteria(y[right_cond])
-
+                if num_right > 0:
+                    right_criteria = Node.f_criteria(y[right_cond])
+                else:
+                    print("something is wrong... (right)")
+                    print(f"{x.min()=:.4f}, {x.max()=:.4f}")
+                    print(f"{new_threshold=:.4f}, {threshold=:.4f}")
+                    right_criteria = 0
+                    
                 new_criteria = (num_left/num_instance)*left_criteria \
                                + (num_right/num_instance)*right_criteria
 
