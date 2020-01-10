@@ -1,0 +1,478 @@
+digraph t {
+	T [label="ID: T
+if x[27] <= 0.500: TL
+else: TR
+
+support ratio = 455/455
+majority class = 1"]
+	TL [label="ID: TL
+if x[23] <= 0.192: TLL
+else: TLR
+
+support ratio = 311/455
+majority class = 1"]
+	TR [label="ID: TR
+if x[16] <= 0.523: TRL
+else: TRR
+
+support ratio = 144/455
+majority class = 0"]
+	TLL [label="ID: TLL
+if x[13] <= 0.046: TLLL
+else: TLLR
+
+support ratio = 287/455
+majority class = 1"]
+	TLR [label="ID: TLR
+if x[27] <= 0.390: TLRL
+else: TLRR
+
+support ratio = 24/455
+majority class = 0"]
+	TLRL [label="ID: TLRL
+if x[26] <= 0.175: TLRLL
+else: TLRLR
+
+support ratio = 10/455
+majority class = 0"]
+	TLRR [label="ID: TLRR
+support ratio = 14/455
+majority class = 0"]
+	TLRLL [label="ID: TLRLL
+if x[4] <= 0.248: TLRLLL
+else: TLRLLR
+
+support ratio = 6/455
+majority class = 0"]
+	TLRLR [label="ID: TLRLR
+support ratio = 4/455
+majority class = 0"]
+	TLRLLL [label="ID: TLRLLL
+support ratio = 2/455
+majority class = 1"]
+	TLRLLR [label="ID: TLRLLR
+if x[4] <= 0.332: TLRLLRL
+else: TLRLLRR
+
+support ratio = 4/455
+majority class = 0"]
+	TLRLLRL [label="ID: TLRLLRL
+support ratio = 3/455
+majority class = 0"]
+	TLRLLRR [label="ID: TLRLLRR
+support ratio = 1/455
+majority class = 1"]
+	TRL [label="ID: TRL
+if x[15] <= 0.523: TRLL
+else: TRLR
+
+support ratio = 143/455
+majority class = 0"]
+	TRR [label="ID: TRR
+support ratio = 1/455
+majority class = 1"]
+	TLLL [label="ID: TLLL
+if x[26] <= 0.297: TLLLL
+else: TLLLR
+
+support ratio = 254/455
+majority class = 1"]
+	TLLR [label="ID: TLLR
+if x[9] <= 0.285: TLLRL
+else: TLLRR
+
+support ratio = 33/455
+majority class = 1"]
+	TLLRL [label="ID: TLLRL
+if x[0] <= 0.301: TLLRLL
+else: TLLRLR
+
+support ratio = 23/455
+majority class = 1"]
+	TLLRR [label="ID: TLLRR
+support ratio = 10/455
+majority class = 1"]
+	TLLRLL [label="ID: TLLRLL
+if x[4] <= 0.369: TLLRLLL
+else: TLLRLLR
+
+support ratio = 9/455
+majority class = 1"]
+	TLLRLR [label="ID: TLLRLR
+if x[21] <= 0.389: TLLRLRL
+else: TLLRLRR
+
+support ratio = 14/455
+majority class = 0"]
+	TLLRLRL [label="ID: TLLRLRL
+if x[1] <= 0.257: TLLRLRLL
+else: TLLRLRLR
+
+support ratio = 7/455
+majority class = 1"]
+	TLLRLRR [label="ID: TLLRLRR
+if x[7] <= 0.201: TLLRLRRL
+else: TLLRLRRR
+
+support ratio = 7/455
+majority class = 0"]
+	TLLRLRLL [label="ID: TLLRLRLL
+support ratio = 4/455
+majority class = 1"]
+	TLLRLRLR [label="ID: TLLRLRLR
+if x[14] <= 0.133: TLLRLRLRL
+else: TLLRLRLRR
+
+support ratio = 3/455
+majority class = 0"]
+	TLLRLRLRL [label="ID: TLLRLRLRL
+support ratio = 1/455
+majority class = 1"]
+	TLLRLRLRR [label="ID: TLLRLRLRR
+support ratio = 2/455
+majority class = 0"]
+	TLLRLRRL [label="ID: TLLRLRRL
+if x[0] <= 0.374: TLLRLRRLL
+else: TLLRLRRLR
+
+support ratio = 2/455
+majority class = 0"]
+	TLLRLRRR [label="ID: TLLRLRRR
+support ratio = 5/455
+majority class = 0"]
+	TLLRLRRLL [label="ID: TLLRLRRLL
+support ratio = 1/455
+majority class = 1"]
+	TLLRLRRLR [label="ID: TLLRLRRLR
+support ratio = 1/455
+majority class = 0"]
+	TLLRLLL [label="ID: TLLRLLL
+support ratio = 7/455
+majority class = 1"]
+	TLLRLLR [label="ID: TLLRLLR
+if x[0] <= 0.256: TLLRLLRL
+else: TLLRLLRR
+
+support ratio = 2/455
+majority class = 0"]
+	TLLRLLRL [label="ID: TLLRLLRL
+support ratio = 1/455
+majority class = 0"]
+	TLLRLLRR [label="ID: TLLRLLRR
+support ratio = 1/455
+majority class = 1"]
+	TRLL [label="ID: TRLL
+if x[1] <= 0.495: TRLLL
+else: TRLLR
+
+support ratio = 136/455
+majority class = 0"]
+	TRLR [label="ID: TRLR
+if x[5] <= 0.630: TRLRL
+else: TRLRR
+
+support ratio = 7/455
+majority class = 0"]
+	TRLRL [label="ID: TRLRL
+if x[0] <= 0.371: TRLRLL
+else: TRLRLR
+
+support ratio = 3/455
+majority class = 1"]
+	TRLRR [label="ID: TRLRR
+support ratio = 4/455
+majority class = 0"]
+	TRLRLL [label="ID: TRLRLL
+support ratio = 2/455
+majority class = 1"]
+	TRLRLR [label="ID: TRLRLR
+support ratio = 1/455
+majority class = 0"]
+	TRLLL [label="ID: TRLLL
+if x[1] <= 0.246: TRLLLL
+else: TRLLLR
+
+support ratio = 82/455
+majority class = 0"]
+	TRLLR [label="ID: TRLLR
+support ratio = 54/455
+majority class = 0"]
+	TRLLLL [label="ID: TRLLLL
+if x[7] <= 0.464: TRLLLLL
+else: TRLLLLR
+
+support ratio = 12/455
+majority class = 0"]
+	TRLLLR [label="ID: TRLLLR
+if x[19] <= 0.181: TRLLLRL
+else: TRLLLRR
+
+support ratio = 70/455
+majority class = 0"]
+	TRLLLLL [label="ID: TRLLLLL
+if x[0] <= 0.380: TRLLLLLL
+else: TRLLLLLR
+
+support ratio = 6/455
+majority class = 0"]
+	TRLLLLR [label="ID: TRLLLLR
+support ratio = 6/455
+majority class = 0"]
+	TRLLLLLL [label="ID: TRLLLLLL
+if x[17] <= 0.335: TRLLLLLLL
+else: TRLLLLLLR
+
+support ratio = 4/455
+majority class = 1"]
+	TRLLLLLR [label="ID: TRLLLLLR
+support ratio = 2/455
+majority class = 0"]
+	TRLLLLLLL [label="ID: TRLLLLLLL
+support ratio = 1/455
+majority class = 0"]
+	TRLLLLLLR [label="ID: TRLLLLLLR
+support ratio = 3/455
+majority class = 1"]
+	TRLLLRL [label="ID: TRLLLRL
+if x[19] <= 0.093: TRLLLRLL
+else: TRLLLRLR
+
+support ratio = 61/455
+majority class = 0"]
+	TRLLLRR [label="ID: TRLLLRR
+if x[2] <= 0.397: TRLLLRRL
+else: TRLLLRRR
+
+support ratio = 9/455
+majority class = 0"]
+	TRLLLRRL [label="ID: TRLLLRRL
+if x[0] <= 0.254: TRLLLRRLL
+else: TRLLLRRLR
+
+support ratio = 2/455
+majority class = 0"]
+	TRLLLRRR [label="ID: TRLLLRRR
+support ratio = 7/455
+majority class = 0"]
+	TRLLLRRLL [label="ID: TRLLLRRLL
+support ratio = 1/455
+majority class = 1"]
+	TRLLLRRLR [label="ID: TRLLLRRLR
+support ratio = 1/455
+majority class = 0"]
+	TLLLL [label="ID: TLLLL
+if x[26] <= 0.146: TLLLLL
+else: TLLLLR
+
+support ratio = 242/455
+majority class = 1"]
+	TLLLR [label="ID: TLLLR
+if x[24] <= 0.385: TLLLRL
+else: TLLLRR
+
+support ratio = 12/455
+majority class = 1"]
+	TLLLRL [label="ID: TLLLRL
+support ratio = 6/455
+majority class = 1"]
+	TLLLRR [label="ID: TLLLRR
+if x[13] <= 0.018: TLLLRRL
+else: TLLLRRR
+
+support ratio = 6/455
+majority class = 0"]
+	TLLLRRL [label="ID: TLLLRRL
+support ratio = 2/455
+majority class = 1"]
+	TLLLRRR [label="ID: TLLLRRR
+if x[27] <= 0.456: TLLLRRRL
+else: TLLLRRRR
+
+support ratio = 4/455
+majority class = 0"]
+	TLLLRRRL [label="ID: TLLLRRRL
+support ratio = 1/455
+majority class = 1"]
+	TLLLRRRR [label="ID: TLLLRRRR
+support ratio = 3/455
+majority class = 0"]
+	TRLLLRLL [label="ID: TRLLLRLL
+if x[29] <= 0.194: TRLLLRLLL
+else: TRLLLRLLR
+
+support ratio = 22/455
+majority class = 0"]
+	TRLLLRLR [label="ID: TRLLLRLR
+support ratio = 39/455
+majority class = 0"]
+	TRLLLRLLL [label="ID: TRLLLRLLL
+support ratio = 16/455
+majority class = 0"]
+	TRLLLRLLR [label="ID: TRLLLRLLR
+if x[25] <= 0.311: TRLLLRLLRL
+else: TRLLLRLLRR
+
+support ratio = 6/455
+majority class = 0"]
+	TRLLLRLLRL [label="ID: TRLLLRLLRL
+support ratio = 1/455
+majority class = 1"]
+	TRLLLRLLRR [label="ID: TRLLLRLLRR
+support ratio = 5/455
+majority class = 0"]
+	TLLLLL [label="ID: TLLLLL
+support ratio = 165/455
+majority class = 1"]
+	TLLLLR [label="ID: TLLLLR
+if x[21] <= 0.425: TLLLLRL
+else: TLLLLRR
+
+support ratio = 77/455
+majority class = 1"]
+	TLLLLRL [label="ID: TLLLLRL
+if x[29] <= 0.313: TLLLLRLL
+else: TLLLLRLR
+
+support ratio = 64/455
+majority class = 1"]
+	TLLLLRR [label="ID: TLLLLRR
+if x[26] <= 0.212: TLLLLRRL
+else: TLLLLRRR
+
+support ratio = 13/455
+majority class = 1"]
+	TLLLLRRL [label="ID: TLLLLRRL
+if x[0] <= 0.232: TLLLLRRLL
+else: TLLLLRRLR
+
+support ratio = 5/455
+majority class = 1"]
+	TLLLLRRR [label="ID: TLLLLRRR
+support ratio = 8/455
+majority class = 1"]
+	TLLLLRRLL [label="ID: TLLLLRRLL
+support ratio = 2/455
+majority class = 1"]
+	TLLLLRRLR [label="ID: TLLLLRRLR
+if x[5] <= 0.136: TLLLLRRLRL
+else: TLLLLRRLRR
+
+support ratio = 3/455
+majority class = 0"]
+	TLLLLRRLRL [label="ID: TLLLLRRLRL
+support ratio = 2/455
+majority class = 0"]
+	TLLLLRRLRR [label="ID: TLLLLRRLRR
+support ratio = 1/455
+majority class = 1"]
+	TLLLLRLL [label="ID: TLLLLRLL
+support ratio = 56/455
+majority class = 1"]
+	TLLLLRLR [label="ID: TLLLLRLR
+if x[26] <= 0.227: TLLLLRLRL
+else: TLLLLRLRR
+
+support ratio = 8/455
+majority class = 1"]
+	TLLLLRLRL [label="ID: TLLLLRLRL
+if x[0] <= 0.215: TLLLLRLRLL
+else: TLLLLRLRLR
+
+support ratio = 2/455
+majority class = 0"]
+	TLLLLRLRR [label="ID: TLLLLRLRR
+support ratio = 6/455
+majority class = 1"]
+	TLLLLRLRLL [label="ID: TLLLLRLRLL
+support ratio = 1/455
+majority class = 1"]
+	TLLLLRLRLR [label="ID: TLLLLRLRLR
+support ratio = 1/455
+majority class = 0"]
+	T -> TL
+	T -> TR
+	TL -> TLL
+	TL -> TLR
+	TR -> TRL
+	TR -> TRR
+	TLL -> TLLL
+	TLL -> TLLR
+	TLR -> TLRL
+	TLR -> TLRR
+	TLRL -> TLRLL
+	TLRL -> TLRLR
+	TLRLL -> TLRLLL
+	TLRLL -> TLRLLR
+	TLRLLR -> TLRLLRL
+	TLRLLR -> TLRLLRR
+	TRL -> TRLL
+	TRL -> TRLR
+	TLLL -> TLLLL
+	TLLL -> TLLLR
+	TLLR -> TLLRL
+	TLLR -> TLLRR
+	TLLRL -> TLLRLL
+	TLLRL -> TLLRLR
+	TLLRLL -> TLLRLLL
+	TLLRLL -> TLLRLLR
+	TLLRLR -> TLLRLRL
+	TLLRLR -> TLLRLRR
+	TLLRLRL -> TLLRLRLL
+	TLLRLRL -> TLLRLRLR
+	TLLRLRR -> TLLRLRRL
+	TLLRLRR -> TLLRLRRR
+	TLLRLRLR -> TLLRLRLRL
+	TLLRLRLR -> TLLRLRLRR
+	TLLRLRRL -> TLLRLRRLL
+	TLLRLRRL -> TLLRLRRLR
+	TLLRLLR -> TLLRLLRL
+	TLLRLLR -> TLLRLLRR
+	TRLL -> TRLLL
+	TRLL -> TRLLR
+	TRLR -> TRLRL
+	TRLR -> TRLRR
+	TRLRL -> TRLRLL
+	TRLRL -> TRLRLR
+	TRLLL -> TRLLLL
+	TRLLL -> TRLLLR
+	TRLLLL -> TRLLLLL
+	TRLLLL -> TRLLLLR
+	TRLLLR -> TRLLLRL
+	TRLLLR -> TRLLLRR
+	TRLLLLL -> TRLLLLLL
+	TRLLLLL -> TRLLLLLR
+	TRLLLLLL -> TRLLLLLLL
+	TRLLLLLL -> TRLLLLLLR
+	TRLLLRL -> TRLLLRLL
+	TRLLLRL -> TRLLLRLR
+	TRLLLRR -> TRLLLRRL
+	TRLLLRR -> TRLLLRRR
+	TRLLLRRL -> TRLLLRRLL
+	TRLLLRRL -> TRLLLRRLR
+	TLLLL -> TLLLLL
+	TLLLL -> TLLLLR
+	TLLLR -> TLLLRL
+	TLLLR -> TLLLRR
+	TLLLRR -> TLLLRRL
+	TLLLRR -> TLLLRRR
+	TLLLRRR -> TLLLRRRL
+	TLLLRRR -> TLLLRRRR
+	TRLLLRLL -> TRLLLRLLL
+	TRLLLRLL -> TRLLLRLLR
+	TRLLLRLLR -> TRLLLRLLRL
+	TRLLLRLLR -> TRLLLRLLRR
+	TLLLLR -> TLLLLRL
+	TLLLLR -> TLLLLRR
+	TLLLLRL -> TLLLLRLL
+	TLLLLRL -> TLLLLRLR
+	TLLLLRR -> TLLLLRRL
+	TLLLLRR -> TLLLLRRR
+	TLLLLRRL -> TLLLLRRLL
+	TLLLLRRL -> TLLLLRRLR
+	TLLLLRRLR -> TLLLLRRLRL
+	TLLLLRRLR -> TLLLLRRLRR
+	TLLLLRLR -> TLLLLRLRL
+	TLLLLRLR -> TLLLLRLRR
+	TLLLLRLRL -> TLLLLRLRLL
+	TLLLLRLRL -> TLLLLRLRLR
+}

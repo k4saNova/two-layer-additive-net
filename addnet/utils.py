@@ -1,4 +1,7 @@
 import numpy as np
+from warnings import warn
+from graphviz import Digraph
+
 
 def sigmoid(x):
     """it returns value of sigmoid function
@@ -29,46 +32,137 @@ def get_ranged_sigmoid(eps=1e-15):
     return ranged_sigmoid
 
 
+def get_uncertainry_metrics(labels, uncertainry_metrics):
+    """it returns a function that computes the criteria like gini impurity.
+    """
+    class_labels = np.unique(labels)
+
+    def gini_impurity(y):
+        return 1. - sum(y[y==cls].shape[0]**2 for cls in class_labels)/y.shape[0]**2
+
+    def entropy(y):
+        # TODO: implement here
+        return 0.5
+
+    if uncertainry_metrics == "gini":
+        return gini_impurity
+    else:
+        return entropy
+
+
+def minimize_criteria(x, y, f_criteria, max_iter):
+    vmin, vmax = x.min(), x.max()
+    if vmin == vmax:
+        return 0, 0
+
+    num_instance = x.shape[0]
+    original_criteria = f_criteria(y)
+    threshold, current_criteria = (vmin + vmax) / 2., original_criteria
+    for it in range(max_iter):
+        new_threshold = (vmin + vmax) / 2.
+
+        # left side from new_threshold
+        # vmin <---here---> t ------ vmax
+        left_cond = x <= new_threshold
+        num_left = x[left_cond].shape[0]
+        left_criteria = f_criteria(y[left_cond])
+
+        # right side from new_threshold
+        # vmin ------ t <---here---> vmax
+        right_cond =  new_threshold < x
+        num_right = x[right_cond].shape[0]
+        right_criteria = f_criteria(y[right_cond])
+
+        new_criteria = (num_left/num_instance)*left_criteria \
+                       + (num_right/num_instance)*right_criteria
+
+        if current_criteria <= new_criteria:
+            break
+
+        # update threshold and current_criteria
+        threshold, current_criteria = new_threshold, new_criteria
+        if left_criteria < right_criteria:
+            vmax = new_threshold
+        elif left_criteria > right_criteria:
+            vmin = new_threshold
+        else: # left_criteria == right_criteria
+            if num_left < num_right:
+                vmin = new_threshold
+            else:
+                vmax = new_threshold
+    else: # this is for-else statement
+        warn(f"It reached {max_iter} iterations!!")
+
+    # return threshold and gain
+    return threshold, original_criteria - current_criteria
+
+
+def get_optimal_grid(X, y, max_grids, uncertainry_metrics="gini", max_iter=100):
+    """it returns thresholds of binarization.
+
+    Args:
+        X: training instances
+        y: labels
+        max_grid: list of maximum bin_dim
+        uncertainry_metrics (optional): 'gini' or 'entropy' (default 'gini')
+        max_iter: (default: 100)
+    """
+    bin_thresholds = [None for _ in range(X.shape[1])]
+    f_criteria = get_uncertainry_metrics(y, uncertainry_metrics)
+    for d in range(X.shape[1]):
+        x = X[:, d]
+        xmin, xmax = x.min(), x.max()
+        if xmin == xmax:
+            continue
+
+        ts = []
+        range_imp = {(xmin, xmax): f_criteria(y)}
+        while len(ts) < max_grids[d] and len(range_imp) > 0:
+            r = max(range_imp, key=lambda k: range_imp[k])
+            range_imp.pop(r)
+            idx = (r[0] <= x) & (x <= r[1])
+            t, g = minimize_criteria(x[idx], y[idx], f_criteria, max_iter)
+            if not (g > 0):
+                continue
+
+            ts.append(t)
+            ts.sort()
+            for tmin, tmax in zip([xmin]+ts, ts+[xmax]):
+                k = (tmin, tmax)
+                if not k in range_imp:
+                    idx = (tmin <= x) & (x <= tmax)
+                    # if len(np.unique(idx)) == 1:
+                    #     continue
+                    impurity = f_criteria(y[idx])
+                    if impurity > 0:
+                        range_imp[k] = impurity
+        #
+        bin_thresholds[d] = ts
+        
+    return bin_thresholds
+
+
 class Tree(dict):
     # id of root node
     root_id = "T"
 
-    
-    def __init__(self, dim, K=10, uncertainry_metrics="gini"):
+    def __init__(self, dim, K=10, R=10, uncertainry_metrics="gini"):
         super().__init__()
         self.unode_id = set() # updatable node
         self.dim = dim
         self.uncertainry_metrics = uncertainry_metrics
         self.bin_thresholds = [[] for _ in range(self.dim)]
-        self.num_region = 1 # number of segmentation. it is NOT # of leafs.
-        self.max_region = K
-        self.num_bdim = 0
-        self.max_bdim = None # TODO: implement here
-        
+        self.region = 1 # number of segmentation. it is NOT # of leafs.
+        self.max_region = R
+        self.bin_dim = 0
+        self.max_bin_dim = K
+
+
     def __setitem__(self, k, v):
         self.unode_id.add(k) # atarashii node ha updatable
-        super().__setitem__(k, v)    
-        
+        super().__setitem__(k, v)
 
-    def get_uncertainry_metrics(self, labels):
-        """it returns a function that computes the criteria like gini impurity.
-        """
-        class_labels = np.unique(labels)
 
-        def gini_impurity(y):
-            return 1. - sum(y[y==cls].shape[0]**2 for cls in class_labels)/y.shape[0]**2
-
-        def entropy(y):
-            # TODO: implement here
-            return 0.5
-        
-        if self.uncertainry_metrics == "gini":
-            return gini_impurity
-        else:
-            return entropy
-
-        
-        
     def fit(self, X, y):
         """ it returns a tree that segments the feature space.
 
@@ -84,17 +178,17 @@ class Tree(dict):
         # initialize Node class variables
         Node.X = X
         Node.y = y
-        Node.f_criteria = self.get_uncertainry_metrics(y)
-        
+        Node.f_criteria = get_uncertainry_metrics(y, self.uncertainry_metrics)
+
         if len(self) > 0:
             for k in self.keys():
                 del self[k]
-                
-        self[Tree.root_id] = Node(Tree.root_id, np.ones(X.shape[0], dtype=bool), None)        
-        while self.num_region < self.max_region and len(self.unode_id) > 0:
+
+        self[Tree.root_id] = Node(Tree.root_id, np.ones(X.shape[0], dtype=bool), None)
+        while self.bin_dim < self.max_bin_dim and len(self.unode_id) > 0:
             self.split_node()
-            
-            
+
+
     def split_node(self):
         """ it splits a node if possible
         """
@@ -111,7 +205,8 @@ class Tree(dict):
             self.bin_thresholds[d].append(threshold)
             self.bin_thresholds[d].sort()
             ld = len(self.bin_thresholds[d]) + 1
-            self.num_region = self.num_region*ld//(ld-1)
+            self.region = self.region*ld//(ld-1)
+            self.bin_dim += 1
 
             # make left and right child node information
             left_id, right_id = self[parent_id].generate_children_id()
@@ -121,6 +216,18 @@ class Tree(dict):
             # split node
             self[left_id]  = Node(left_id, left_indexes, self[parent_id])
             self[right_id] = Node(right_id, right_indexes, self[parent_id])
+
+
+    def render(self, path="tree.dot"):
+        t = Digraph("t", filename=path, format="svg", engine="dot")
+        for k in self.keys():
+            t.node(self[k].ID, label=self[k].__repr__())
+
+        for k in self.keys():
+            if self[k].has_children():
+                t.edge(self[k].ID, self[k].children_id[0])
+                t.edge(self[k].ID, self[k].children_id[1])
+        t.render(view=False)
 
 
     def predict(self, X):
@@ -185,78 +292,26 @@ class Node(object):
 
 
     def split_self(self, max_iter=100):
-        num_instance, dim = Node.X.shape
-        
-        def minimize_criteria(x, y):
-            vmin, vmax = x.min(), x.max()
-            if vmin == vmax:
-                return 0, 0
-                
-            original_criteria = Node.f_criteria(y)
-            threshold, current_criteria = (vmin + vmax) / 2., original_criteria
-            for it in range(max_iter):
-                new_threshold = (vmin + vmax) / 2.
-
-                # left side from new_threshold
-                # vmin <---here---> t ------ vmax
-                left_cond = x <= new_threshold
-                num_left = x[left_cond].shape[0]
-                if num_left > 0:
-                    left_criteria = Node.f_criteria(y[left_cond])
-                else:
-                    print("something is wrong... (left)")
-                    print(f"{x.min()=:.4f}, {x.max()=:.4f}")
-                    print(f"{new_threshold=:.4f}, {threshold=:.4f}")
-                    left_criteria = 0
-                    
-                # right side from new_threshold
-                # vmin ------ t <---here---> vmax
-                right_cond =  new_threshold < x
-                num_right = x[right_cond].shape[0]
-                if num_right > 0:
-                    right_criteria = Node.f_criteria(y[right_cond])
-                else:
-                    print("something is wrong... (right)")
-                    print(f"{x.min()=:.4f}, {x.max()=:.4f}")
-                    print(f"{new_threshold=:.4f}, {threshold=:.4f}")
-                    right_criteria = 0
-                    
-                new_criteria = (num_left/num_instance)*left_criteria \
-                               + (num_right/num_instance)*right_criteria
-
-                if current_criteria <= new_criteria:
-                    break
-
-                # update threshold and current_criteria
-                threshold, current_criteria = new_threshold, new_criteria
-                if left_criteria < right_criteria:
-                    vmax = new_threshold
-                elif left_criteria > right_criteria:
-                    vmin = new_threshold
-                else: # left_criteria == right_criteria
-                    if num_left < num_right:
-                        vmin = new_threshold
-                    else:
-                        vmax = new_threshold
-            else: # this is for-else statement
-                print(f"it reached {max_iter} iterations!!")
-
-            # return threshold and gain
-            return threshold, original_criteria - current_criteria
-
+        """it splits a node.
+        """
+        dim = Node.X.shape[1]
         # kokode zen zigen de split wo tamesite sairyouno mono wo kaesu
         best_d, best_threshold, best_gain = 0, 0, 0
         for d in range(dim):
-            t, g = minimize_criteria(Node.X[self.indexes, d], Node.y[self.indexes])
+            t, g = minimize_criteria(Node.X[self.indexes, d], Node.y[self.indexes], Node.f_criteria, max_iter)
             if g > best_gain:
                 best_d, best_threshold, best_gain = d, t, g
         return best_d, best_threshold, best_gain
 
 
     def generate_children_id(self):
-        self.children_id = (f"{self.ID}:L", f"{self.ID}:R")
+        """
+        """
+        self.children_id = (f"{self.ID}L", f"{self.ID}R")
         return self.children_id
 
 
     def has_children(self):
+        """it returns True if this node has children nodes.
+        """
         return self.children_id is not None

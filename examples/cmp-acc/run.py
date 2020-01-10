@@ -46,7 +46,6 @@ def load_dataset(data_idx):
         dropped_label = 0 # 0, 1, 2
         x = x[y!=dropped_label, :]
         y = y[y!=dropped_label]
-        # y = LabelEncoder().fit_transform(y)
         return x, y
     
     elif data_idx == DataSet.BreastCancer.value:
@@ -84,8 +83,10 @@ def main(data_idx=0):
 
         
     ### SUBNET
-    # bin_thresholds = [[0.25, 0.5, 0.75] for _ in range(4)] ## 1st acc
-    clf = SubNet(max_seg=100)# , binarization=bin_thresholds)
+    bin_thresholds = [[0.25, 0.5, 0.75] for _ in range(x_train.shape[1])]
+    max_grids = [4]*x_train.shape[1]
+    clf = SubNet(binarize_type="auto", check_increasing_type="lr")
+                 # dot_path="examples/cmp-acc/tree.dot")#, bin_thresholds=bin_thresholds)
     measure_accuracy(clf, ClfType.SubNet.name)
     
     ### SNTR (tree for segmentation)
@@ -127,7 +128,7 @@ def main(data_idx=0):
     print("")
     
     print(" --- ACCURACY --- ")
-    # write a markdown table
+    # write a table
     l1 = " | ".join([f"{ctype.value}" for ctype in ClfType])
     l2 = " | ".join([f"{result[ctype.name]['train:accuracy']:.3f}"
                      for ctype in ClfType])
@@ -143,7 +144,7 @@ if __name__ == '__main__':
     if len(sys.argv) == 1:
         main()
     else: # len(sys.argv) > 1
-        arg = sys.argv[1]
+        arg = int(sys.argv[1])
         if arg in ["--help", "-H"]:
             print("# TODO: WRITE HELP MESSAGE")
         elif arg in [data.value for data in DataSet]:

@@ -1,1 +1,1 @@
-from addnet.addnet import SubNet, TwoLayerAddNet
+from addnet.addnet import SubNet
