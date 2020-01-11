@@ -9,21 +9,21 @@ from addnet.utils import *
 
 
 class SubNet(object):
-    def __init__(self, binarize_type="tree", max_grids=None, max_bin_dim=100,
+    def __init__(self, binarize_type="tree", max_grids=4, max_bin_dim=100,
                  bin_thresholds=None, check_increasing_type="lr", dot_path=None):
         """SubNet initializer
 
         Args:
             binarize_type: "grid", "tree", or, "given"
-            max_bin_dim: 
-            bin_thresholds: 
+            max_bin_dim:
+            bin_thresholds:
             check_increasing_type (optional): "lr": check with LogisticRegression (default)
                                               "sp": check with Spearman correlation coefficient
             dot_path: dot file path. it is used when binarize=='tree
         """
         # a coefficient vector of the model
         self.coef_ = None
-        
+
         # parameters of segmentation
         self.binarize_type = binarize_type
         self.max_grids = max_grids
@@ -31,7 +31,7 @@ class SubNet(object):
         self.bin_thresholds = bin_thresholds
         self.bin_dim = None
         self.check_increasing_type = check_increasing_type
-        
+
         # parameters of optimization
         self.max_iter = 1000
         self.method = "SLSQP"
@@ -52,7 +52,7 @@ class SubNet(object):
         """
         if len(X.shape) != 2:
             raise ValueError(f"X.shape must be (n_samples, n_features)")
-        
+
         binarized_x = np.zeros((X.shape[0], self.bin_dim))
         # b_{p, i} in paper
         idx = 0
@@ -81,7 +81,7 @@ class SubNet(object):
         idx = 0
         for i, (thresholds, increasing) in enumerate(zip(self.bin_thresholds, self.is_increasing)):
             for j, t in enumerate(thresholds):
-                if (increasing and j==0) or (not increasing and j==len(thresholds)-1):
+                if (increasing and j==0) or ((not increasing) and j==len(thresholds)-1):
                     bounds[idx] = (None, None)
                 else:
                     bounds[idx] = (0, None)
@@ -99,24 +99,29 @@ class SubNet(object):
             tree.fit(X, y)
             if self.dot_path is not None:
                 tree.render(self.dot_path)
-
             self.bin_thresholds = tree.bin_thresholds
-            self.bin_dim = tree.bin_dim
+
         elif self.binarize_type == "grid":
-            if self.max_grids is None: # set default parameters
-                self.max_grids = [4]*X.shape[1]
-            self.bin_thresholds = get_optimal_grid(X, y, self.max_grids, self.uncertainry_metrics)
-            self.bin_dim = sum(map(len, self.bin_thresholds)) + 1
+            arg = [self.max_grids]**X.shape[1]
+            self.bin_thresholds = get_optimal_grid(X, y, arg, self.uncertainry_metrics)
+
         elif self.binarize_type == "given":
-            self.bin_dim = sum(map(len, self.bin_thresholds)) + 1
+            pass
+
         else: # auto
-            DIV = 4
             self.bin_thresholds = []
             for d in range(X.shape[1]):
-                ts = [(s+1)/(DIV+1) for s in range(DIV)]
+                ts = [(s+1)/(self.max_grids+1) for s in range(self.max_grids)]
                 self.bin_thresholds.append(ts)
-            self.bin_dim = sum(map(len, self.bin_thresholds)) + 1
-            
+
+        # hazi no syori ## korega naito monotonicity ga hosyou dekinai
+        for d, increasing in enumerate(self.is_increasing):
+            if increasing:
+                self.bin_thresholds[d] = [-np.Inf] + self.bin_thresholds[d]
+            else:
+                self.bin_thresholds[d] = self.bin_thresholds[d] + [np.Inf]
+        self.bin_dim = sum(map(len, self.bin_thresholds)) + 1
+
 
     def check_increasing(self, X, y):
         """it sets self.is_increasing
@@ -153,12 +158,12 @@ class SubNet(object):
 
         if np.unique(y).shape[0] != 2:
             raise ValueError(f"y must just contain 2 class labels.")
-        
+
         # make label encoder
         if self.label_encoder is None:
             self.label_encoder = LabelEncoder()
             y = self.label_encoder.fit_transform(y)
-            
+
         # check increasity (or decreasity) of each attribute
         self.check_increasing(X, y)
 
@@ -192,7 +197,7 @@ class SubNet(object):
         x0 = np.zeros(binarized_x.shape[1])
         result = minimize(obj_f_l2, x0=x0, bounds=bounds, jac=jac_f_l2,
                           options={"maxiter": self.max_iter}, method=self.method)
-        
+
         if not result.success:
             warn(f"Warning in SubNet.fit(): {result.message}")
 

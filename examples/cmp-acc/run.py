@@ -82,7 +82,6 @@ def main(data_idx=0):
         
     ### SUBNET
     bin_thresholds = [[0.25, 0.5, 0.75] for _ in range(x_train.shape[1])]
-    max_grids = [4]*x_train.shape[1]
     clf = SubNet(binarize_type="auto", check_increasing_type="lr")
                  # dot_path="examples/cmp-acc/tree.dot")#, bin_thresholds=bin_thresholds)
     measure_accuracy(clf, ClfType.SubNet.name)

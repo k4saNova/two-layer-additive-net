@@ -18,5 +18,4 @@ clean:
 	rm $(PWD)/build/ $(PWD)/dist/ -rf
 
 install:
-	$(VPYTHON) setup.py bdist_wheel
-	cp -r $(PWD)/build/lib/emil $(INSTALL_PATH)
+	@ $(VPYTHON) setup.py install
