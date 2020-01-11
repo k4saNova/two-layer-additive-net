@@ -1,6 +1,11 @@
 # Two Layer Additive Network
 
 
-## NOTE:
-Call all scripts from the top directory (here).
+## INSTALL
+
+```py
+python setup.py install
+```
+
+## NOTE
 You can use the Makefile.

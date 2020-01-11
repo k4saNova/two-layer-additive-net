@@ -1,17 +1,22 @@
-ENV_PATH = $(PWD)/env
-PYTHON_VERSION = `which python3.8`
-PYTHON = $(ENV_PATH)/bin/python
+PYTHON = python3.8
+VENV_DIR = venv
+VPYTHON = $(VENV_DIR)/bin/python
+PIP = $(VENV_DIR)/bin/pip
+INSTALL_PATH = $(VENV_DIR)/lib/$(PYTHON)/site-packages/
 
-.PHONY: env tests
-env:
-	@ virtualenv $(ENV_PATH) --python=$(PYTHON_VERSION)
+.PHONY: venv tests
+venv:
+	@ $(PYTHON) -m venv $(VENV_DIR)
+
+requirements:
+	@ $(PIP) install -r examples/requirements.txt
 
 tests:
-	@ $(PYTHON) tests/test.py
-
-install:
-	@ $(PYTHON) setup.py install
+	@ $(VPYTHON) tests/test.py
 
 clean:
-	@ rm $(PWD)/build/ $(PWD)/dist/ $(ENV_PATH) -rf
-	@ find . -type d -name "__pycache__" -delete
+	rm $(PWD)/build/ $(PWD)/dist/ -rf
+
+install:
+	$(VPYTHON) setup.py bdist_wheel
+	cp -r $(PWD)/build/lib/emil $(INSTALL_PATH)

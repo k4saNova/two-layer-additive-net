@@ -1,6 +1,4 @@
 import sys
-sys.path.append(".")
-
 import pickle
 import numpy as np 
 from enum import Enum
@@ -32,7 +30,7 @@ class DataSet(Enum):
     
 # Constants    
 SEED = 314
-RESULT_PATH = "examples/cmp-acc/result.pkl"
+RESULT_PATH = "result.pkl"
 FEATURE_RANGE = (0, 1) # regularizatioin
 
 
